@@ -13,7 +13,7 @@ class Settings:
     GOOGLE_BASE_URL = "https://www.googleapis.com/customsearch/v1"
     USER_AGENT: str = "IdeaHistoryAgent/1.0"
 
-    MAX_GOOGLE_RESULTS: int = 5
+    MAX_GOOGLE_RESULTS: int = 20
     MAX_WIKI_RESULTS: int = 0
     MAX_SNIPPET_LENGTH: int = 200
 

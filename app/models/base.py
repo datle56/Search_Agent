@@ -10,8 +10,6 @@ class Source(BaseModel):
     snippet: str
 
 
-
-
 from pydantic import BaseModel, Field
 import uuid
 from typing import List
@@ -20,6 +18,8 @@ class Source(BaseModel):
     url: str
     title: str
     snippet: str
+    source_type: str = Field(..., description="Either 'google' or 'wikipedia'")
+    retrieved_at: datetime = Field(default_factory=datetime.now)
 
 class Node(BaseModel):
     """Represents a component (constituent term) of a concept."""
@@ -29,17 +29,7 @@ class Node(BaseModel):
     origin: str = ""  # Ví dụ: nguồn gốc hay bối cảnh hình thành thành phần này
     related_terms: List[str] = Field(default_factory=list)
     sources: List[Source] = Field(default_factory=list)
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Decentralization",
-                "description": "A system where control is distributed rather than centralized.",
-                "origin": "Evolved from peer-to-peer networking concepts.",
-                "related_terms": ["distributed", "peer-to-peer"],
-                "sources": [],
-            }
-        }
+    is_original: bool = False  # True nếu đây là node ban đầu, False nếu là node mở rộng
 
 class Edge(BaseModel):
     """Represents an evolution or influence between two idea snapshots"""

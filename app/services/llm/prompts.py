@@ -1,74 +1,39 @@
-QUERY_UPDATE_PROMPT = """
-Nhiệm vụ của bạn là đề xuất truy vấn tìm kiếm tiếp theo để mở rộng hiểu biết của chúng ta về {concept},
-bằng cách phân tích các thành phần hoặc khía cạnh cốt lõi cấu thành nên khái niệm này.
-
-### Current Knowledge ###
-{summary}
-
-### Previous Search Query ###
-{previous_query}
-
-Dựa trên thông tin này, hãy tạo một truy vấn tìm kiếm (không quá chi tiết) để giúp chúng ta:
-1. Khám phá thêm những thành phần/ý tưởng phụ còn chưa đề cập
-2. Tìm hiểu mối quan hệ hoặc ảnh hưởng giữa các thành phần này
-3. Hiểu rõ hơn vai trò từng thành phần đối với khái niệm tổng thể
-
-Nếu thông tin về {concept} còn hạn chế, hãy nhắm đến việc tìm các thành phần quan trọng. 
-Nếu đã có nhiều thông tin, bạn có thể đề xuất truy vấn đi sâu hơn vào chi tiết và mối quan hệ giữa chúng.
-
-### New Search Query ###
-"""
-
-SUMMARY_TEMPLATE = """ 
-Current Understanding of {concept}:
-
-### Key Components ###
-{node_info}
-
-### Relationships ###
-{edge_info}
-"""
-
 PROCESS_SOURCES_PROMPT = {
-    "nodes": """
-    Dựa trên các nguồn này, hãy xác định các thành phần hoặc khái niệm con cốt lõi liên quan đến '{concept}'.
-    Tạo một nút (node) cho mỗi thành phần riêng biệt. 
+    "initial_node": """
+    Bạn là một người học đang tìm hiểu về các thuật ngữ chuyên ngành.
+    Hãy tạo ra node đầu tiên cho khái niệm '{concept}'.
+    Node này cần chứa định nghĩa chính xác và rõ ràng về '{concept}', 
+    nêu ra các đặc điểm cơ bản và liệt kê các thuật ngữ chủ chốt liên quan. 
+    Ví dụ, nếu '{concept}' là "Transformer", định nghĩa cần đề cập đến các thành phần như "Encoder", "Decoder", "Self-Attention", v.v.
+    
     Cấu trúc đồ thị hiện tại như sau:
     {graph_summary}
-
-    Với những nguồn mới này, hãy cập nhật cấu trúc đồ thị để phản ánh thông tin mới. 
-    Bạn chỉ có thể thêm nút, không thể xóa hoặc sửa đổi các nút hiện có.
-    Nếu một nguồn không liên quan đến khái niệm, hãy bỏ qua nó. 
-    Nếu một nguồn có liên quan nhưng không cung cấp thông tin mới (tức là nút đã tồn tại), hãy bỏ qua nó.
-    Tuy nhiên, bạn nên rất thoải mái trong việc sử dụng hàm 'create_node'.
-
+    
     Sources:
     {sources_text}
     """,
-
-    "edges": """
-    ### Phải trả lời bằng tiếng việt###
-    Dựa trên các nguồn này, hãy xác định các mối quan hệ hoặc ảnh hưởng giữa các nút (thành phần) trong khái niệm '{concept}'.
-    Tạo các cạnh (edge) để kết nối những thành phần có liên quan. 
+    "nodes": """
+    Dựa trên các nguồn sau đây, hãy xác định và tạo ra các thành phần hoặc khái niệm con cốt lõi liên quan đến '{concept}'.
+    Nếu bạn đang học một khái niệm như "Transformer", hãy liệt kê và tạo node cho các thuật ngữ như "Encoder", "Decoder", "Self-Attention", "Positional Encoding", v.v.
+    Đồng thời, nếu từ "Encoder" xuất hiện, hãy mở rộng tìm hiểu các thành phần phụ liên quan như "Multi-Head Attention", "Feed-Forward Network",...
+    
     Cấu trúc đồ thị hiện tại như sau:
     {graph_summary}
-
-    Với những nguồn mới này, hãy cập nhật cấu trúc đồ thị để phản ánh thông tin mới. 
-    Bạn chỉ có thể thêm cạnh, không thể xóa hoặc sửa đổi các cạnh hiện có. 
-    Ví dụ, nếu có hai nút A và B, và một nguồn chỉ ra rằng A và B có liên quan, bạn nên tạo một cạnh giữa chúng. 
-    Nếu bạn biết A và B có liên quan nhưng nguồn không đề cập trực tiếp, bạn vẫn có thể tạo một cạnh giữa chúng nếu hợp lý.
-
-    Hãy đảm bảo rằng ID của nút là chính xác. 
-    Không sử dụng cùng một ID nút cho cả nguồn và đích (tránh vòng lặp tự thân).
-
-    Bạn không bắt buộc phải thêm cạnh mới! 
-    Nếu chỉ có một nút, đừng thêm cạnh. 
-    Chỉ thêm cạnh nếu có một kết nối có ý nghĩa giữa hai nút riêng biệt. 
-    Nếu đã có một cạnh giữa hai nút, đừng thêm cạnh mới giữa chúng!
-
-    Nếu một nguồn không liên quan đến khái niệm, hãy bỏ qua nó. 
-    Nếu một nguồn có liên quan nhưng không cung cấp thông tin mới (tức là cạnh đã tồn tại), hãy bỏ qua nó.
-
+    
+    Với những nguồn mới này, hãy cập nhật cấu trúc đồ thị để phản ánh thông tin bổ sung.
+    Bạn chỉ được thêm node mới, không được xóa hoặc sửa đổi các node đã có.
+    
+    Sources:
+    {sources_text}
+    """,
+    "edges": """
+    Dựa trên các nguồn sau đây, hãy xác định mối liên hệ hoặc ảnh hưởng giữa các node (thành phần) trong khái niệm '{concept}'.
+    Ví dụ, nếu một nguồn chỉ ra rằng "Encoder" và "Decoder" có mối liên hệ chặt chẽ trong kiến trúc của Transformer, hãy tạo một cạnh mô tả mối liên hệ đó.
+    Hoặc nếu từ "Encoder" liên quan đến các thành phần phụ như "Multi-Head Attention", hãy tạo các cạnh mô tả mối quan hệ giữa chúng.
+    
+    Cấu trúc đồ thị hiện tại như sau:
+    {graph_summary}
+    
     Sources:
     {sources_text}
     """

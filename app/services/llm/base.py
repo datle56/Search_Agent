@@ -4,7 +4,7 @@ from typing import List, Dict, Optional, Any
 
 
 class BaseChatClient(ABC):
-    """Abstract base class for chat clients (OpenAI, Claude, etc)"""
+    """Abstract base class for chat clients (OpenAI)"""
 
     @abstractmethod
     async def chat_completion(
